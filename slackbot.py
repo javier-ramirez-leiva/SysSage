@@ -19,6 +19,8 @@ with open(config_path, "r") as config_file:
 
 SLACK_BOT_TOKEN = config["slack_bot_token"]
 SLACK_APP_TOKEN = config["slack_app_token"]
+SYSTEM_NAME = config["system_name"]
+STATUS_KEYWORD = config["status_keyword"]
 
 alerts_enabled = False
 try:
@@ -110,7 +112,7 @@ def get_system_status():
 
     # Final status message
     return (
-        "*System Status:*\n\n"
+        f"*System Status: {SYSTEM_NAME}*\n\n"
         "*CPU:*\n"
         f"> {cpu_percent}%\n\n"
         "*RAM:*\n"
@@ -120,7 +122,7 @@ def get_system_status():
         f"{disk_info}"
     )
 
-@app.message(re.compile(r"!status"))
+@app.message(re.compile(STATUS_KEYWORD))
 def handle_status_command(message, say):
     say(get_system_status())
 
