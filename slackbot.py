@@ -1,6 +1,6 @@
 import os
+import subprocess
 import psutil
-import speedtest
 import re
 import json
 import threading
@@ -82,12 +82,25 @@ def get_system_status():
 
     # Speedtest
     try:
-        st = speedtest.Speedtest()
-        st.download()
-        st.upload()
-        ping = st.results.ping
-        download = st.results.download / 1_000_000  # Mbps
-        upload = st.results.upload / 1_000_000
+        result = subprocess.run(
+                [
+                    "speedtest",
+                    "--accept-license",
+                    "--accept-gdpr",
+                    "-f",
+                    "json"
+                ],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+
+        data = json.loads(result.stdout)
+
+        ping = data["ping"]["latency"]  # ms
+        download = data["download"]["bandwidth"] * 8 / 1_000_000  # Mbps
+        upload = data["upload"]["bandwidth"] * 8 / 1_000_000      # Mbps
+
         speedtest_info = (
             f"> Ping: {ping:.0f} ms\n"
             f"> Download: {download:.2f} Mbps\n"
