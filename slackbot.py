@@ -41,6 +41,8 @@ except Exception:
     print("Disk filter is not enabled.")
 
 
+seen_events = set()
+
 # === Initialize Slack App ===
 app = App(token=SLACK_BOT_TOKEN)
 
@@ -124,6 +126,11 @@ def get_system_status():
 
 @app.message(re.compile(STATUS_KEYWORD))
 def handle_status_command(message, say):
+    event_id = message.get("client_msg_id") or message.get("ts")
+    if event_id in seen_events:
+        return  # ignore duplicate
+    seen_events.add(event_id)
+    print(f"Received status command: {STATUS_KEYWORD}")
     say(get_system_status())
 
 if __name__ == "__main__":
